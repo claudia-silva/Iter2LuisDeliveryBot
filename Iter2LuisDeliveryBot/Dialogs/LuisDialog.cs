@@ -7,7 +7,7 @@ using Microsoft.Bot.Connector;
 using System.Threading;
 using System.Collections.Generic;
 
-namespace Iter2LuisDeliveryBot.Dialogs
+namespace LuisDeliveryBot.Dialogs
 {
     [Serializable]
     [LuisModel("caa3fcf3-7f0c-4a7f-af28-6554cbbb4fd8", "d9bdd7eae973449191a235a6760435f1")]
@@ -248,5 +248,5 @@ namespace Iter2LuisDeliveryBot.Dialogs
             }
         }
     }
-}
 
+}
