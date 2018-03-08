@@ -52,5 +52,47 @@ namespace LuisDeliveryBot.Dialogs
             await context.PostAsync(message);
             context.Wait(this.MessageReceived);
         }
+
+        [LuisIntent("TrackParcel")]
+        public async Task TrackParcel(IDialogContext context, LuisResult result)
+        {
+            sAction = "TrackParcel";
+            string message = $"What is your tracking number?(QQQnnnn)";
+            await context.PostAsync(message);
+            context.Wait(this.MessageReceived);
+        }
+
+        [LuisIntent("TrackingNo")]
+        public async Task TrackingNo(IDialogContext context, LuisResult result)
+        {
+            string message = "";
+
+            if (sAction == "TrackParcel")
+            {
+                message = $"Your parcel " + result.Entities[0].Entity + " will be delivered today";
+            }
+            else if (sAction == "Time")
+            {
+
+            }
+            else if (sAction == "Date")
+            {
+
+            }
+            else if (sAction == "Address")
+            {
+
+            }
+            await context.PostAsync(message);
+            context.Wait(this.MessageReceived);
+        }
+
+        private async Task TrackingNumber(IDialogContext context)
+        {
+            string msg = $"What is your tracking number?(QQQnnnn";
+            await context.PostAsync(msg);
+            //context.Wait(this.TrackingNoReceived);
+            context.Wait(this.MessageReceived);
+        }
     }
 }
