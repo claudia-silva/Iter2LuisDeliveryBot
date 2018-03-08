@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using LuisDeliveryBot.Dialogs;
 
 namespace Iter2LuisDeliveryBot.Dialogs
 {
@@ -19,10 +20,10 @@ namespace Iter2LuisDeliveryBot.Dialogs
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
             var activity = await result as Activity;
-            await context.Forward(new LuisDialog(), ResumeAftelLuisDialog, activity, CancellationToken.None);
+            await context.Forward(new LuisDialog(), ResumeAfterlLuisDialog, activity, CancellationToken.None);
         }
 
-        private async Task ResumeAftelLuisDialog(IDialogContext context, IAwaitable<object> result)
+        private async Task ResumeAfterlLuisDialog(IDialogContext context, IAwaitable<object> result)
         {
             context.Wait(MessageReceivedAsync);
         }

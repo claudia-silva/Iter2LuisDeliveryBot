@@ -5,8 +5,9 @@ using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
 using System.Threading;
+using System.Collections.Generic;
 
-namespace LuisDeliveryBot.Dialogs
+namespace Iter2LuisDeliveryBot.Dialogs
 {
     [Serializable]
     [LuisModel("caa3fcf3-7f0c-4a7f-af28-6554cbbb4fd8", "d9bdd7eae973449191a235a6760435f1")]
@@ -17,6 +18,7 @@ namespace LuisDeliveryBot.Dialogs
         string sTrackingNo;
         string sAction;
         string sAddress = "Brunel University London";
+        private string optionSelected;
 
         // methods to handle LUIS intents 
         [LuisIntent("")]
@@ -57,7 +59,40 @@ namespace LuisDeliveryBot.Dialogs
         public async Task TrackParcel(IDialogContext context, LuisResult result)
         {
             sAction = "TrackParcel";
-            string message = $"What is your tracking number?(QQQnnnn)";
+            RequestTrackingNo(context, result);
+        }
+
+        [LuisIntent("Time")]
+        public async Task Time(IDialogContext context, LuisResult result)
+        {
+            sAction = "Time";
+            RequestTrackingNo(context, result);
+        }
+
+        [LuisIntent("Date")]
+        public async Task Date(IDialogContext context, LuisResult result)
+        {
+            sAction = "Date";
+            RequestTrackingNo(context, result);
+        }
+
+        [LuisIntent("Address")]
+        public async Task Address(IDialogContext context, LuisResult result)
+        {
+            sAction = "Address";
+            RequestTrackingNo(context, result);
+        }
+
+        [LuisIntent("LocalServicePoint")]
+        public async Task LocalServicePoint(IDialogContext context, LuisResult result)
+        {
+            sAction = "LocalServicePoint";
+            RequestTrackingNo(context, result);
+        }
+
+        public async Task RequestTrackingNo(IDialogContext context, LuisResult result)
+        {
+            string message = $"What is your tracking number?(TRA1234)";
             await context.PostAsync(message);
             context.Wait(this.MessageReceived);
         }
@@ -66,96 +101,155 @@ namespace LuisDeliveryBot.Dialogs
         public async Task TrackingNo(IDialogContext context, LuisResult result)
         {
             string message = "";
+            sTrackingNo = result.Entities[0].Entity;
 
             if (sAction == "TrackParcel")
             {
-                message = $"Your parcel " + result.Entities[0].Entity + " will be delivered today";
+                message = $"Your parcel { this.sTrackingNo } will be delivered today";
+                await context.PostAsync(message);
+                context.Wait(this.MessageReceived);
             }
             else if (sAction == "Time")
             {
-
+                PromptDialog.Choice(context, this.ReArrangeTime, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { this.sTrackingNo } is being delivered on " + DateTime.Now.ToString("HH:mm:ss") + ", Would you like to change the time of delivery?");
             }
             else if (sAction == "Date")
             {
-
+                PromptDialog.Choice(context, this.ReArrangeDate, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { this.sTrackingNo } is being delivered on " + DateTime.Now.ToString("dd MMM yyyy") + ", Would you like to change the day of delivery?");
             }
             else if (sAction == "Address")
             {
-
+                PromptDialog.Choice(context, this.ChangeAddressNextSteps, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { result.Entities[0].Entity } is being delivered to the Address: " + sAddress + ", Would you like to change this?");
             }
-            await context.PostAsync(message);
-            context.Wait(this.MessageReceived);
+            else if (sAction == "LocalServicePoint")
+            {
+                PromptDialog.Choice(context, this.LocalServicePointNextSteps, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { result.Entities[0].Entity } is being delivered to the Address: " + sAddress + ", Would you like to change this to a local service point?");
+            }
+
         }
 
         private async Task TrackingNumber(IDialogContext context)
         {
-            string msg = $"What is your tracking number?(QQQnnnn";
+            string msg = $"What is your tracking number?(TRA1234)";
             await context.PostAsync(msg);
             //context.Wait(this.TrackingNoReceived);
             context.Wait(this.MessageReceived);
         }
 
-        [LuisIntent("Time")]
-        public async Task Time(IDialogContext context, LuisResult result)
-        {
-            sAction = "Time";
-            string message = $"Your parcel will be delivered at " + DateTime.Now.ToString("HH:mm:ss");
-            await context.PostAsync(message);
-            context.Wait(this.MessageReceived);
-        }
 
-        [LuisIntent("Date")]
-        public async Task Date(IDialogContext context, LuisResult result)
+        public async Task ReArrangeTime(IDialogContext context, IAwaitable<string> result)
         {
-            string message = $"Your parcel will be delivered on " + DateTime.Now.ToString("dd MMM yyyy");
-            await context.PostAsync(message);
-            context.Wait(this.MessageReceived);
-        }
-
-        [LuisIntent("Address")]
-        public async Task Address(IDialogContext context, LuisResult result)
-        {
-            sAction = "Address";
-            string message = $"Your parcel is being delivered to " + sAddress + " do you want to change the address?";
-            await context.PostAsync(message);
-            context.Wait(this.ChangeAddress);
-        }
-
-        private async Task ChangeAddress(IDialogContext context, IAwaitable<IMessageActivity> result)
-        {
-            var message = await result;
-
-            if (message.Text == "yes")
+            optionSelected = await result;
+            switch (optionSelected)
             {
-                string msg = $"What is the new address?";
-                await context.PostAsync(msg);
-                context.Wait(this.AddressReceived);
-
-            }
-            else if (message.Text == "no")
-            {
-                string msg = $"Is there anything else DeliveryBot can help you with ?";
-                await context.PostAsync(msg);
-                context.Wait(this.MessageReceived);
+                case "Yes":
+                    PromptDialog.Choice(context, this.ReArrangeTimeResumeAfter, new List<string>() { "10:00AM", "11:00AM", "12:00PM", "13:00PM" }, "These are the available times, Please select an option?");
+                    break;
+                case "No":
+                    // PromptDialog.Text(context, ChangeAddressResumeAfter, "");
+                    break;
             }
         }
 
-        private async Task AddressReceived(IDialogContext context, IAwaitable<IMessageActivity> result)
+        public async Task ReArrangeTimeResumeAfter(IDialogContext context, IAwaitable<string> result)
         {
-            var message = await result;
-            sAddress = message.Text;
-
-            string msg = $"Your parcel will now be delivered to " + sAddress + ".";
-            await context.PostAsync(msg);
-            context.Wait(this.MessageReceived);
+            optionSelected = await result;
+            PromptDialog.Text(context, NextSteps, $@"Your parcel with Track No: {this.sTrackingNo} will be delivered to you at {this.optionSelected}");
         }
-        [LuisIntent("LocalServicePoint")]
-        public async Task LocalServicePoint(IDialogContext context, LuisResult result)
+
+
+        public async Task ReArrangeDate(IDialogContext context, IAwaitable<string> result)
         {
-            sAction = "Address";
-            string message = $"Your parcel is being delivered to " + sAddress + " do you want to change this to a local service point?";
-            await context.PostAsync(message);
-            context.Wait(this.ChangeAddress);
+            optionSelected = await result;
+            switch (optionSelected)
+            {
+                case "Yes":
+                    PromptDialog.Choice(context, this.ReArrangeDateResumeAfter, new List<string>() { "Monday", "Tuesday", "Wednesday" }, "These are the available dates, Please select an option?");
+                    break;
+                case "No":
+                    // PromptDialog.Text(context, ChangeAddressResumeAfter, "");
+                    break;
+            }
+        }
+
+        public async Task ReArrangeDateResumeAfter(IDialogContext context, IAwaitable<string> result)
+        {
+            optionSelected = await result;
+            PromptDialog.Text(context, NextSteps, $@"Your parcel with Track No: {this.sTrackingNo} will be delivered to you on {this.optionSelected}");
+        }
+
+        public async Task ChangeAddressNextSteps(IDialogContext context, IAwaitable<string> result)
+        {
+            optionSelected = await result;
+            switch (optionSelected)
+            {
+                case "Yes":
+                    PromptDialog.Text(context, ChangeAddress, "What would you like to change it to?");
+                    break;
+                case "No":
+                    // PromptDialog.Text(context, ChangeAddressResumeAfter, "");
+                    break;
+            }
+        }
+
+        public async Task LocalServicePointNextSteps(IDialogContext context, IAwaitable<string> result)
+        {
+            optionSelected = await result;
+            switch (optionSelected)
+            {
+                case "Yes":
+                    await this.ChangeToCollection(context);
+                    break;
+                case "No":
+                    // PromptDialog.Text(context, ChangeAddressResumeAfter, "");
+                    break;
+            }
+        }
+
+        public async Task ChangeToCollection(IDialogContext context)
+        {
+            await context.PostAsync("These are the nearest Local Service Points to you:");
+            PromptDialog.Choice(context, this.CollectionChangeResumeAfter, new List<string>() { "Asda", "Sainsburys", "Tesco" }, "These are the nearest Local Service Points to you: Please choose one?");
+        }
+
+        public async Task CollectionChangeResumeAfter(IDialogContext context, IAwaitable<string> result)
+        {
+            optionSelected = await result;
+            PromptDialog.Text(context, NextSteps, $@"Your parcel with Track No: {this.sTrackingNo} will now be delivered to {this.optionSelected}");
+        }
+
+        public async Task ChangeAddress(IDialogContext context, IAwaitable<string> result)
+        {
+            optionSelected = await result;
+            PromptDialog.Text(context, NextSteps, $@"Your parcel with Track No: {this.sTrackingNo} will now be delivered to {this.optionSelected}");
+        }
+
+        //private async Task ChangeAddress(IDialogContext context, IAwaitable<IMessageActivity> result)
+        //{
+        //    var message = await result;
+
+        //    if (message.Text == "yes")
+        //    {
+        //        string msg = $"What is the new address?";
+        //        await context.PostAsync(msg);
+        //        context.Wait(this.AddressReceived);
+
+        //    }
+        //    else if (message.Text == "no")
+        //    {
+        //        string msg = $"Is there anything else DeliveryBot can help you with ?";
+        //        await context.PostAsync(msg);
+        //        context.Wait(this.MessageReceived);
+        //    }
+        //}
+
+
+        public async Task NextSteps(IDialogContext context, IAwaitable<string> result)
+        {
+            await context.PostAsync("Is there anything else that DeliveryBot can help you with?");
+            //PromptDialog.Choice(context, this.ChangeAddressResumeAfter, new List<string>() { "Yes", "No" }, "Please select an option?");
         }
     }
+
 }
+
