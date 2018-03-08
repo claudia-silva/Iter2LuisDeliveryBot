@@ -17,7 +17,7 @@ namespace Iter2LuisDeliveryBot.Dialogs
         string sName;
         string sTrackingNo;
         string sAction;
-        string sAddress = "Brunel University London";
+        string sAddress = "Brunel University London, Kingston Lane, UB8 3PH, Uxbridge";
         private string optionSelected;
 
         // methods to handle LUIS intents 
@@ -224,32 +224,29 @@ namespace Iter2LuisDeliveryBot.Dialogs
             PromptDialog.Text(context, NextSteps, $@"Your parcel with Track No: {this.sTrackingNo} will now be delivered to {this.optionSelected}");
         }
 
-        //private async Task ChangeAddress(IDialogContext context, IAwaitable<IMessageActivity> result)
-        //{
-        //    var message = await result;
-
-        //    if (message.Text == "yes")
-        //    {
-        //        string msg = $"What is the new address?";
-        //        await context.PostAsync(msg);
-        //        context.Wait(this.AddressReceived);
-
-        //    }
-        //    else if (message.Text == "no")
-        //    {
-        //        string msg = $"Is there anything else DeliveryBot can help you with ?";
-        //        await context.PostAsync(msg);
-        //        context.Wait(this.MessageReceived);
-        //    }
-        //}
-
 
         public async Task NextSteps(IDialogContext context, IAwaitable<string> result)
         {
             await context.PostAsync("Is there anything else that DeliveryBot can help you with?");
-            //PromptDialog.Choice(context, this.ChangeAddressResumeAfter, new List<string>() { "Yes", "No" }, "Please select an option?");
+            PromptDialog.Choice(context, this.NextStepsResumeAfter, new List<string>() { "Yes", "No" }, "Please select an option?");
+        }
+
+        public async Task NextStepsResumeAfter(IDialogContext context, IAwaitable<string> result)
+        {
+            optionSelected = await result;
+
+            switch (optionSelected)
+            {
+                case "Yes":
+                    string msg = $"Hi " + sName + ". How can I help you today?";
+                    await context.PostAsync(msg);
+                    context.Wait(this.MessageReceived);
+                    break;
+                case "No":
+                    PromptDialog.Text(context, NextStepsResumeAfter, "Thank you for using DeliveryBot, Hope to speak with you again soon!");
+                    break;
+            }
         }
     }
-
 }
 
