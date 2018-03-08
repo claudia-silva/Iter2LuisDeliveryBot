@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
-using LuisDeliveryBot.Dialogs;
+using Iter2LuisDeliveryBot.Dialogs;
 
 namespace Iter2LuisDeliveryBot.Dialogs
 {
