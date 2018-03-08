@@ -7,7 +7,7 @@ using Microsoft.Bot.Connector;
 using System.Threading;
 using System.Collections.Generic;
 
-namespace LuisDeliveryBot.Dialogs
+namespace Iter2LuisDeliveryBot.Dialogs
 {
     [Serializable]
     [LuisModel("caa3fcf3-7f0c-4a7f-af28-6554cbbb4fd8", "d9bdd7eae973449191a235a6760435f1")]
@@ -125,11 +125,11 @@ namespace LuisDeliveryBot.Dialogs
             }
             else if (sAction == "Time")
             {
-                PromptDialog.Choice(context, this.ReArrangeTime, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { this.sTrackingNo } is being delivered on " + DateTime.Now.ToString("HH:mm:ss") + ", Would you like to change the time of delivery?");
+                PromptDialog.Choice(context, this.ReArrangeTime, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { this.sTrackingNo } is being delivered on " + DateTime.Now.ToString("10:30:00") + ", Would you like to change the time of delivery?");
             }
             else if (sAction == "Date")
             {
-                PromptDialog.Choice(context, this.ReArrangeDate, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { this.sTrackingNo } is being delivered on " + DateTime.Now.ToString("dd MMM yyyy") + ", Would you like to change the day of delivery?");
+                PromptDialog.Choice(context, this.ReArrangeDate, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { this.sTrackingNo } is being delivered on " + DateTime.Now.ToString("10 03 2018") + ", Would you like to change the day of delivery?");
             }
             else if (sAction == "Address")
             {
@@ -151,7 +151,6 @@ namespace LuisDeliveryBot.Dialogs
                 await context.PostAsync(message);
                 context.Wait(this.MessageReceived);
             }
-
         }
 
         private async Task TrackingNumber(IDialogContext context)
@@ -168,7 +167,7 @@ namespace LuisDeliveryBot.Dialogs
             switch (optionSelected)
             {
                 case "Yes":
-                    PromptDialog.Choice(context, this.ReArrangeTimeResumeAfter, new List<string>() { "10:00AM", "11:00AM", "12:00PM", "13:00PM" }, "These are the available times, Please select an option?");
+                    PromptDialog.Choice(context, this.ReArrangeTimeResumeAfter, new List<string>() { "10:00AM", "11:00AM", "12:00PM", "13:00PM", "14:00PM", "15:00PM" }, "These are the available times, Please select an option?");
                     break;
                 case "No":
                     // PromptDialog.Text(context, ChangeAddressResumeAfter, "");
@@ -189,7 +188,7 @@ namespace LuisDeliveryBot.Dialogs
             switch (optionSelected)
             {
                 case "Yes":
-                    PromptDialog.Choice(context, this.ReArrangeDateResumeAfter, new List<string>() { "Monday", "Tuesday", "Wednesday" }, "These are the available dates, Please select an option?");
+                    PromptDialog.Choice(context, this.ReArrangeDateResumeAfter, new List<string>() { "Monday 12th March", "Tuesday 13th March", "Wednesday 14th March" }, "These are the available dates, Please select an option?");
                     break;
                 case "No":
                     // PromptDialog.Text(context, ChangeAddressResumeAfter, "");
@@ -274,3 +273,4 @@ namespace LuisDeliveryBot.Dialogs
         }
     }
 }
+
