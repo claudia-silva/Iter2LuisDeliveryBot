@@ -94,5 +94,69 @@ namespace LuisDeliveryBot.Dialogs
             //context.Wait(this.TrackingNoReceived);
             context.Wait(this.MessageReceived);
         }
+
+        [LuisIntent("Time")]
+        public async Task Time(IDialogContext context, LuisResult result)
+        {
+            sAction = "Time";
+            string message = $"Your parcel will be delivered at " + DateTime.Now.ToString("HH:mm:ss");
+            await context.PostAsync(message);
+            context.Wait(this.MessageReceived);
+        }
+
+        [LuisIntent("Date")]
+        public async Task Date(IDialogContext context, LuisResult result)
+        {
+            string message = $"Your parcel will be delivered on " + DateTime.Now.ToString("dd MMM yyyy");
+            await context.PostAsync(message);
+            context.Wait(this.MessageReceived);
+        }
+
+        [LuisIntent("Address")]
+        public async Task Address(IDialogContext context, LuisResult result)
+        {
+            sAction = "Address";
+            string message = $"Your parcel is being delivered to " + sAddress + " do you want to change the address?";
+            await context.PostAsync(message);
+            context.Wait(this.ChangeAddress);
+        }
+
+        private async Task ChangeAddress(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
+            var message = await result;
+
+            if (message.Text == "yes")
+            {
+                string msg = $"What is the new address?";
+                await context.PostAsync(msg);
+                context.Wait(this.AddressReceived);
+
+            }
+            else if (message.Text == "no")
+            {
+                string msg = $"Is there anything else DeliveryBot can help you with ?";
+                await context.PostAsync(msg);
+                context.Wait(this.MessageReceived);
+            }
+        }
+
+        private async Task AddressReceived(IDialogContext context, IAwaitable<IMessageActivity> result)
+        {
+            var message = await result;
+            sAddress = message.Text;
+
+            string msg = $"Your parcel will now be delivered to " + sAddress + ".";
+            await context.PostAsync(msg);
+            context.Wait(this.MessageReceived);
+        }
+
+        [LuisIntent("LocalServicePoint")]
+        public async Task LocalServicePoint(IDialogContext context, LuisResult result)
+        {
+            sAction = "Address";
+            string message = $"Your parcel is being delivered to " + sAddress + " do you want to change this to a local service point?";
+            await context.PostAsync(message);
+            context.Wait(this.ChangeAddress);
+        }
     }
 }
