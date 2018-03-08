@@ -44,5 +44,13 @@ namespace LuisDeliveryBot.Dialogs
             await context.PostAsync(msg);
             context.Wait(this.MessageReceived);
         }
+
+        [LuisIntent("Name")]
+        public async Task Name(IDialogContext context, LuisResult result)
+        {
+            string message = $"Hi " + result.Entities[0].Entity;
+            await context.PostAsync(message);
+            context.Wait(this.MessageReceived);
+        }
     }
 }
