@@ -90,6 +90,20 @@ namespace LuisDeliveryBot.Dialogs
             RequestTrackingNo(context, result);
         }
 
+        [LuisIntent("CustomerSupport")]
+        public async Task CustomerSupport(IDialogContext context, LuisResult result)
+        {
+            sAction = "CustomerSupport";
+            RequestTrackingNo(context, result);
+        }
+
+        [LuisIntent("LeaveMessage")]
+        public async Task LeaveMessage(IDialogContext context, LuisResult result)
+        {
+            sAction = "LeaveMessage";
+            RequestTrackingNo(context, result);
+        }
+
         public async Task RequestTrackingNo(IDialogContext context, LuisResult result)
         {
             string message = $"What is your tracking number?(TRA1234)";
@@ -125,6 +139,18 @@ namespace LuisDeliveryBot.Dialogs
             {
                 PromptDialog.Choice(context, this.LocalServicePointNextSteps, new List<string>() { "Yes", "No" }, $@"Your parcel with Track No: { result.Entities[0].Entity } is being delivered to the Address: " + sAddress + ", Would you like to change this to a local service point?");
             }
+            else if (sAction == "CustomerSupport")
+            {
+                message = $"The contact number for Customer Service is 0800 102 0304 and the email address is DeliveryBot@Bot.com.";
+                await context.PostAsync(message);
+                context.Wait(this.MessageReceived);
+            }
+            else if (sAction == "LeaveMessage")
+            {
+                message = $"The driver delivering your parcel with Track No: { result.Entities[0].Entity } has been notified.";
+                await context.PostAsync(message);
+                context.Wait(this.MessageReceived);
+            }
 
         }
 
@@ -135,7 +161,6 @@ namespace LuisDeliveryBot.Dialogs
             //context.Wait(this.TrackingNoReceived);
             context.Wait(this.MessageReceived);
         }
-
 
         public async Task ReArrangeTime(IDialogContext context, IAwaitable<string> result)
         {
@@ -248,5 +273,4 @@ namespace LuisDeliveryBot.Dialogs
             }
         }
     }
-
 }
