@@ -149,7 +149,6 @@ namespace LuisDeliveryBot.Dialogs
             await context.PostAsync(msg);
             context.Wait(this.MessageReceived);
         }
-
         [LuisIntent("LocalServicePoint")]
         public async Task LocalServicePoint(IDialogContext context, LuisResult result)
         {
